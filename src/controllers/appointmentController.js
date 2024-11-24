@@ -1,17 +1,16 @@
 const prisma = require('../models/prismaClient');
 
-// Book an Appointment
 const bookAppointment = async (req, res) => {
   try {
     const { professorId, startTime, endTime } = req.body;
     const studentId = req.user.id;
 
-    // Validate that professor is available during the specified time range
+
     const availability = await prisma.availability.findFirst({
       where: {
         professorId,
-        startTime: { lte: new Date(startTime) }, // Availability starts before or at the requested start time
-        endTime: { gte: new Date(endTime) },   // Availability ends after or at the requested end time
+        startTime: { lte: new Date(startTime) }, 
+        endTime: { gte: new Date(endTime) },   
       },
     });
 
@@ -19,7 +18,7 @@ const bookAppointment = async (req, res) => {
       return res.status(400).json({ message: 'No available slot for the professor during the specified time range.' });
     }
 
-    // Create the appointment
+
     const appointment = await prisma.appointment.create({
       data: {
         professorId,
@@ -29,7 +28,7 @@ const bookAppointment = async (req, res) => {
       },
     });
 
-    // Remove the professor's availability
+
     await prisma.availability.delete({
       where: { id: availability.id },
     });
@@ -41,12 +40,11 @@ const bookAppointment = async (req, res) => {
   }
 };
 
-// Cancel an Appointment
+
 const cancelAppointment = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Check if the appointment exists
     const appointment = await prisma.appointment.findUnique({
       where: { id: parseInt(id) },
     });
@@ -55,7 +53,7 @@ const cancelAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found.' });
     }
 
-    // Delete the appointment
+
     await prisma.appointment.delete({
       where: { id: parseInt(id) },
     });
@@ -67,7 +65,6 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
-// Get Appointments
 const getAppointments = async (req, res) => {
   try {
     const userId = req.user.id;
